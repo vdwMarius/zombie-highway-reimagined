@@ -3,6 +3,8 @@ extends Node3D
 const ArtFactory = preload("res://scripts/art.gd")
 const GarageData = preload("res://scripts/progression.gd")
 const SteeringInput = preload("res://scripts/steering.gd")
+const RealScenery = preload("res://scripts/scenery.gd")
+const WorkshopScene = preload("res://scripts/home_garage.gd")
 const GOLD := Color("f2b35d")
 const INK := Color("101d24")
 const MUTED := Color("9baaa9")
@@ -17,6 +19,10 @@ var mode: String = "garage"
 var car: Node3D
 var camera: Camera3D
 var world: Node3D
+var garage_room: Node3D
+var outdoor_environment: Environment
+var road_probe: ReflectionProbe
+var high_reflections: bool = true
 var road_tiles: Array[Node3D] = []
 var wrecks: Array[Node3D] = []
 var zombies: Array[Dictionary] = []
@@ -59,90 +65,15 @@ func _ready() -> void:
 	steering.sensitivity = garage.sensitivity
 	steering.tilt_enabled = garage.tilt_enabled
 	build_world()
+	garage_room = WorkshopScene.new()
+	add_child(garage_room)
 	build_car()
 	build_ui()
 	build_audio()
 	show_garage()
 
 func build_world() -> void:
-	world = Node3D.new()
-	add_child(world)
-	var env := WorldEnvironment.new()
-	var environment := Environment.new()
-	environment.background_mode = Environment.BG_SKY
-	var sky := Sky.new()
-	var sky_mat := ProceduralSkyMaterial.new()
-	sky_mat.sky_top_color = Color("263e50")
-	sky_mat.sky_horizon_color = Color("dca67c")
-	sky_mat.ground_horizon_color = Color("dca67c")
-	sky_mat.ground_bottom_color = Color("5e6660")
-	sky_mat.sky_curve = 0.2
-	sky.sky_material = sky_mat
-	environment.sky = sky
-	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color("8399a5")
-	environment.ambient_light_energy = 0.38
-	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	environment.fog_enabled = true
-	environment.fog_light_color = Color("b3a089")
-	environment.fog_density = 0.0028
-	environment.fog_sky_affect = 0.25
-	env.environment = environment
-	add_child(env)
-	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-25, -38, 0)
-	sun.light_color = Color("ffd19c")
-	sun.light_energy = 0.85
-	sun.shadow_enabled = true
-	sun.directional_shadow_max_distance = 70
-	add_child(sun)
-	ArtFactory.box(world, Vector3(700, 0.2, 700), Vector3(0, -0.3, -200), "8c8067")
-	# Distant mesas and layered low-poly hills.
-	for i in range(65):
-		var side := -1.0 if i % 2 == 0 else 1.0
-		var height := rng.randf_range(8, 42)
-		var at := Vector3(side * rng.randf_range(32, 180), height * 0.5 - 1, rng.randf_range(-340, 30))
-		var hill := ArtFactory.cylinder(world, rng.randf_range(15, 43), height, at, "716c62" if i % 3 else "8e7963", rng.randf_range(2, 10), 5)
-		hill.rotation.y = rng.randf_range(0, TAU)
-	for i in range(16):
-		var tile := Node3D.new()
-		world.add_child(tile)
-		tile.position.z = 20.0 - i * 22.0
-		ArtFactory.box(tile, Vector3(12.4, 0.14, 22), Vector3(0, -0.09, 0), "383d3b")
-		for side in [-1.0, 1.0]:
-			ArtFactory.box(tile, Vector3(0.12, 0.015, 22), Vector3(side * 5.45, 0.005, 0), "d3c8a4")
-			ArtFactory.box(tile, Vector3(0.8, 0.03, 22), Vector3(side * 6.5, -0.02, 0), "b6a27f")
-			ArtFactory.box(tile, Vector3(0.12, 0.65, 0.13), Vector3(side * 7.5, 0.3, -3), "686c60")
-			ArtFactory.box(tile, Vector3(0.16, 0.15, 0.17), Vector3(side * 7.5, 0.65, -3), "dfb773", 0, true)
-		for x in [-1.9, 1.9]:
-			for z in [-8.0, 3.0]:
-				ArtFactory.box(tile, Vector3(0.1, 0.018, 4), Vector3(x, 0.01, z), "bab59a")
-		# Roadside rocks and brittle vegetation recycle with road tiles.
-		for j in range(3):
-			var side := -1.0 if j % 2 else 1.0
-			var x := side * rng.randf_range(10, 25)
-			ArtFactory.cylinder(tile, rng.randf_range(0.5, 1.8), rng.randf_range(0.5, 1.5), Vector3(x, 0.2, rng.randf_range(-9, 9)), "8b7964", 0.2, 5)
-		road_tiles.append(tile)
-	for i in range(6):
-		var wreck := ArtFactory.vehicle({}, true)
-		world.add_child(wreck)
-		wreck.position = Vector3(lane_x(i), 0, -45.0 - i * 48.0)
-		wreck.rotation.y = rng.randf_range(-0.35, 0.35)
-		wrecks.append(wreck)
-	# Receding roadside utility poles.
-	for i in range(12):
-		var pole := Node3D.new()
-		world.add_child(pole)
-		pole.position = Vector3(10, 0, 15 - i * 29)
-		ArtFactory.box(pole, Vector3(0.22, 8, 0.22), Vector3(0, 4, 0), "514f45")
-		ArtFactory.box(pole, Vector3(3, 0.14, 0.14), Vector3(0, 7.5, 0), "514f45")
-		pole.add_to_group("poles")
-	camera = Camera3D.new()
-	add_child(camera)
-	camera.fov = 52
-	camera.far = 500
-	camera.position = Vector3(8, 4.5, 8)
-	camera.look_at(Vector3(0, 0.8, 0))
+	RealScenery.build(self)
 
 func build_car() -> void:
 	var x := 0.0
@@ -269,6 +200,10 @@ func save_progress() -> void:
 
 func show_garage() -> void:
 	mode = "garage"
+	world.hide()
+	garage_room.show()
+	camera.environment = garage_room.environment
+	garage_room.refresh_reflections()
 	for zombie in zombies:
 		zombie.node.queue_free()
 	zombies.clear()
@@ -278,23 +213,24 @@ func show_garage() -> void:
 	clear_panel()
 	steering.clear()
 	car.position = Vector3.ZERO
-	car.rotation = Vector3.ZERO
+	car.rotation = Vector3(0, PI + 0.12, 0)
 	block(panel, Vector2.ZERO, Vector2(430, 900), Color(0.035, 0.075, 0.09, 0.95))
 	block(panel, Vector2(40, 46), Vector2(42, 4), GOLD)
 	label_at(panel, "AN ORIGINAL SURVIVAL DRIVING GAME", Vector2(40, 64), 14, MUTED)
 	label_at(panel, "DEAD", Vector2(35, 88), 112, WHITE, true)
 	label_at(panel, "MILE", Vector2(35, 191), 112, GOLD, true)
 	label_at(panel, "BUILD IT. DRIVE IT. SURVIVE IT.", Vector2(40, 320), 19, WHITE, true)
-	label_at(panel, "OUTPOST 09  /  THE LAST HIGHWAY", Vector2(40, 379), 16, MUTED)
+	label_at(panel, "CEDAR LANE  /  HOME GARAGE", Vector2(40, 379), 16, MUTED)
 	label_at(panel, "One road. No rescue.\nTake the wheel of the Nomad and make\nevery kilometer count.", Vector2(40, 415), 19, WHITE)
 	button(panel, "HIT THE HIGHWAY   →", Vector2(40, 532), Vector2(350, 64), start_run, true)
 	button(panel, "CONTROLS & SETTINGS", Vector2(40, 610), Vector2(350, 54), show_settings)
 	label_at(panel, "A / D or ← / →  STEER\nSPACE  FIRE     R  RELOAD     ESC  PAUSE", Vector2(40, 698), 16, MUTED)
 	label_at(panel, "ANDROID: TILT TO STEER · TAP FIRE\nTouch steering also available in settings.", Vector2(40, 757), 15, MUTED)
-	label_at(panel, "PROTOTYPE  0.1     /     OFFLINE", Vector2(40, 854), 14, MUTED)
-	label_at(panel, "GARAGE  /  NOMAD 01", Vector2(470, 44), 25, WHITE, true)
+	button(panel, "CREDITS & LICENSES", Vector2(40, 808), Vector2(350, 32), show_credits)
+	label_at(panel, "PROTOTYPE  0.2     /     VULKAN", Vector2(40, 854), 14, MUTED)
+	label_at(panel, "HOME GARAGE  /  NOMAD GT", Vector2(470, 44), 25, WHITE, true)
 	label_at(panel, "01", Vector2(470, 86), 72, Color("d4d8bd"), true)
-	label_at(panel, "SURVIVAL UTILITY VEHICLE", Vector2(550, 107), 16, WHITE)
+	label_at(panel, "MIDNIGHT PETROL  /  TOURING COUPE", Vector2(550, 107), 16, WHITE)
 	label_at(panel, "◇  %s SCRAP" % garage.credits, Vector2(1115, 44), 26, GOLD, true)
 	label_at(panel, "BEST  %04d m" % int(garage.best), Vector2(1115, 83), 18, MUTED)
 	# The part selector stays below the vehicle preview.
@@ -315,6 +251,14 @@ func show_garage() -> void:
 	label_at(panel, "Earn scrap by surviving and removing climbers.", Vector2(481, 832), 15, MUTED)
 	if not save_message.is_empty():
 		label_at(panel, save_message, Vector2(470, 601), 16, GOLD)
+
+func show_credits() -> void:
+	clear_panel()
+	block(panel, Vector2(280, 120), Vector2(880, 660), Color(0.035, 0.075, 0.09, 0.98))
+	label_at(panel, "BUILT TO KEEP GOING.", Vector2(330, 150), 48, GOLD, true)
+	label_at(panel, "ASSET CREDITS / PROTOTYPE 0.2", Vector2(330, 220), 22, MUTED, true)
+	label_at(panel, "CAR CONCEPT — Eric Chadwick / Darmstadt Graphics Group GmbH, 2024.\nCreative Commons Attribution 4.0 International (CC BY 4.0).\nBased on a public-domain concept by Unity Fan.\nSource: github.com/KhronosGroup/glTF-Sample-Assets / Models/CarConcept\nModified paint, sample branding, materials, wheels and modular parts.\ncreativecommons.org/licenses/by/4.0/\n\nGarage, highway, surface textures, UI and synthesized sound: original work.\nBarlow fonts: Jeremy Tribby / contributors, SIL Open Font License 1.1.\nGodot Engine: MIT license — godotengine.org/license\nFull attribution and license texts are included with the project.", Vector2(330, 270), 20, WHITE)
+	button(panel, "BACK TO GARAGE", Vector2(330, 670), Vector2(780, 58), show_garage, true)
 
 func buy_selected() -> void:
 	if garage.purchase(selected):
@@ -337,11 +281,14 @@ func show_settings() -> void:
 		garage.sensitivity = steering.sensitivity
 		save_progress()
 		show_settings())
-	button(panel, "RECALIBRATE TILT", Vector2(380, 466), Vector2(325, 54), func(): steering.calibrate())
+	button(panel, "REFLECTIONS: " + ("LIVE" if high_reflections else "STATIC"), Vector2(380, 466), Vector2(325, 54), func():
+		high_reflections = not high_reflections
+		road_probe.update_mode = ReflectionProbe.UPDATE_ALWAYS if high_reflections else ReflectionProbe.UPDATE_ONCE
+		show_settings())
 	button(panel, "AUDIO: " + ("OFF" if muted else "ON"), Vector2(725, 466), Vector2(335, 54), func():
 		muted = not muted
 		show_settings())
-	label_at(panel, "Desktop: A/D or arrows · Space fire · R reload · Esc pause\nTouch: hold bottom left/right for steering · FIRE above the zones\nFirst build: procedural art, one weapon, early handling balance.", Vector2(380, 553), 18, MUTED)
+	label_at(panel, "Desktop: A/D or arrows · Space fire · R reload · Esc pause\nTouch: hold bottom left/right for steering · FIRE above the zones\nHigh preset: real-time reflections · Vulkan graphics required.", Vector2(380, 553), 18, MUTED)
 	button(panel, "BACK", Vector2(380, 670), Vector2(680, 58), show_pause if mode == "paused" else show_garage, true)
 
 func make_hud() -> void:
@@ -388,6 +335,9 @@ func start_run() -> void:
 		zombie.node.queue_free()
 	zombies.clear()
 	mode = "run"
+	garage_room.hide()
+	world.show()
+	camera.environment = outdoor_environment
 	car.position = Vector3.ZERO
 	car.rotation = Vector3.ZERO
 	speed = 12.0
@@ -480,12 +430,12 @@ func _process(delta: float) -> void:
 	pump_audio()
 	if not is_instance_valid(car):
 		return
-	var target := Vector3(7.4, 4.1, 7.4) if mode == "garage" else Vector3(car.position.x * 0.36, 4.4, 8.8)
+	var target := Vector3(5.8, 2.65, 6.0) if mode == "garage" else Vector3(car.position.x * 0.36, 3.8, 8.8)
 	if mode == "garage":
 		target.x += sin(Time.get_ticks_msec() * 0.00018) * 0.8
 	camera.position = camera.position.lerp(target, 1.0 - exp(-delta * 3.5))
 	# Garage frames the vehicle in the free region to the right of its sidebar.
-	var look := Vector3(-1.8, 0.55, 0) if mode == "garage" else Vector3(car.position.x * 0.6, 0.8, -12)
+	var look := Vector3(-1.5, 0.45, 0) if mode == "garage" else Vector3(car.position.x * 0.6, 0.65, -10)
 	camera.look_at(look)
 	flash.color.a = move_toward(flash.color.a, 0, delta * 1.8)
 	shot_timer = maxf(0, shot_timer - delta)
@@ -515,7 +465,9 @@ func _physics_process(delta: float) -> void:
 		lean = move_toward(lean, 0, absf(steer) * delta * 0.65 * float(stats.stability))
 	car.rotation.z = -lean + steer * 0.05
 	car.rotation.y = -lateral * 0.025
-	car.position.y = sin(elapsed * 16) * 0.012
+	car.position.y = sin(elapsed * 16) * 0.006
+	ArtFactory.animate_vehicle(car, delta, speed, steer)
+	road_probe.position.x = car.position.x * 0.5
 	if absf(lean) >= 0.95:
 		end_run("ROLLED BY THE HORDE")
 		return
@@ -526,7 +478,7 @@ func _physics_process(delta: float) -> void:
 	for pole in get_tree().get_nodes_in_group("poles"):
 		pole.position.z += speed * delta
 		if pole.position.z > 35:
-			pole.position.z -= 348
+			pole.position.z -= 350
 	hit_cooldown = maxf(0, hit_cooldown - delta)
 	for wreck in wrecks:
 		var previous_z := wreck.position.z
@@ -637,7 +589,7 @@ func fire() -> void:
 			remove_zombie(index)
 	if is_instance_valid(shot_line):
 		shot_line.queue_free()
-	var origin := car.to_global(Vector3(0, 1.98, -1.2))
+	var origin := car.to_global(Vector3(0, 1.47, -0.84))
 	shot_line = ArtFactory.box(self, Vector3(0.035, 0.035, origin.distance_to(target)), (origin + target) / 2, "ffe8a0", 0, true)
 	shot_line.look_at(target)
 	shot_timer = 0.065
@@ -646,3 +598,4 @@ func _exit_tree() -> void:
 	if is_instance_valid(engine_audio):
 		engine_audio.stop()
 		engine_audio.stream = null
+	ArtFactory.release_cached_resources()

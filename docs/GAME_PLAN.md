@@ -4,14 +4,14 @@
 
 An Android-first, landscape 3D survival driving game: steer through an abandoned highway, shake off zombies climbing onto the vehicle, shoot dangerous attackers, and spend earnings rebuilding one increasingly formidable car.
 
-Zombie Highway 2 is the reference for the core driving/combat rhythm. Earn to Die is the reference for the satisfaction of turning a basic vehicle into a visibly upgraded survival machine. Use original names, artwork, audio, interface layouts, and assets. Capture the clarity and pace of the references without reproducing their screens or assets.
+Zombie Highway 2 is the reference for the core driving/combat rhythm. Earn to Die is the reference for the satisfaction of turning a basic vehicle into a visibly upgraded survival machine. Use original names, artwork, audio and interface layouts, with properly licensed third-party assets where appropriate. Capture the clarity and pace of the references without reproducing their screens or assets.
 
 The first release is a polished, offline, single-player vertical slice. No multiplayer, advertising, accounts, purchases, open world, or vehicle roster. These would dilute the driving and upgrade work before it is proven.
 
 ## Technology decision
 
 - **Engine:** Godot 4.6.3, currently installed in the development environment. Use typed GDScript and native engine features; reserve C++ extensions for measured bottlenecks.
-- **Rendering:** begin with the Compatibility renderer to support a broad Android range. Validate the visual target on it before considering a Vulkan/Mobile-renderer variant. Use native Android exports, not a browser wrapper.
+- **Rendering:** Forward Mobile / Vulkan for the realistic automotive direction requested after the initial prototype. Use clear-coat PBR materials and local reflection probes. Target the user’s Samsung Galaxy S26 Ultra first; measure real-device performance before expanding the supported tier. Use native Android exports.
 - **Authoring:** Godot editor for scenes and tuning; a text editor with GDScript support for code. Keep the project usable without a paid IDE or plugin. Blender can supply custom meshes once the visual prototype is approved.
 - **Delivery:** desktop development build for fast iteration, Android debug APK for device testing, signed release APK/AAB later. Android export templates, SDK/JDK compatibility, and signing are separate setup work; engine availability alone does not prove Android builds work.
 - **Versioning:** commit source scenes, scripts, resources, import settings, and asset license records. Ignore generated imports, build outputs, SDKs, and signing secrets.
@@ -22,8 +22,8 @@ Godot fits the small scope, rapid iteration, native sensor access, and modest bu
 
 | Area | Initial commitment |
 | --- | --- |
-| Vehicle | One fictional compact SUV with exposed upgrade mounting points |
-| Environment | One cohesive dusk desert highway, assembled from reusable road chunks |
+| Vehicle | One detailed touring coupe with modular upgrade mounting points |
+| Environment | One mountain highway, assembled from reusable road chunks |
 | Driving | Automatic acceleration, tilt steering, speed loss from damage/obstacles, recoverable roll danger |
 | Zombies | Three roles: light climber, heavy destabilizer, armored attacker |
 | Weapons | Three vehicle-mounted weapon options: sidearm, shotgun, automatic weapon |
@@ -74,11 +74,11 @@ Purchases validate balance and ownership, deduct once, and save atomically. Run 
 
 ## Interface and visual direction
 
-The interface follows a familiar mobile flow: title → garage/play → run → results → garage/retry. The garage is the central hub with a large real-time vehicle preview, category tabs, part inspection, comparison, price, and one clear purchase/equip action. Settings and pause remain shallow and easy to reach.
+The interface follows a familiar mobile flow: title → garage/play → run → results → garage/retry. Start in a furnished home garage. Later location-specific garage scenes can use distinct lighting, materials and layouts; only the first garage is in the initial slice. The garage is the central hub with a large real-time vehicle preview, category tabs, part inspection, comparison, price, and one clear purchase/equip action. Settings and pause remain shallow and easy to reach.
 
 Use an original industrial salvage style: charcoal panels, warm amber highlights, pale legible typography, restrained hazard markings, and a consistent icon language. Keep the driving HUD sparse: distance, vehicle health, ammo/reload, weapon selection, and roll danger. Confirm destructive actions, but avoid confirmation dialogs on routine retries.
 
-Target a coherent stylized 3D look: strong vehicle silhouettes, hand-authored material palettes, a warm horizon against cool shadows, baked ambient shading, pooled dust and sparks, short hit flashes, and restrained camera motion. Zombies need readable attachment poses and reactions more than high polygon counts. Avoid an expensive photorealistic asset mix.
+Target realistic automotive presentation: detailed curved coachwork, clear-coat paint, alloy wheels, tinted glass, textured concrete/asphalt, local environmental reflections, and practical garage lighting. Keep exposure and material response coherent. Reflections use probes rather than ray tracing; allow a static-reflection setting for performance comparisons. Characters need an eventual rigged production-art pass to match the vehicle fidelity.
 
 Plan asset replacement early: primitives are acceptable for the driving proof, but the visual milestone must include the actual car silhouette, zombie animation, environment palette, upgrade parts, HUD styling, sound effects, and responsive feedback. Track source and redistribution license for every external asset, font, and audio file.
 
@@ -156,8 +156,12 @@ For each milestone record what ran, what passed, what failed, and what still nee
 
 - The selected repository currently contains only its README and an initial commit; no game or tests exist yet.
 - Godot 4.6.3 and Java are available in this cloud instance. Android SDK/export templates and device access have not been established.
-- Default presentation is landscape, offline, and stylized 3D; one vehicle and one environment keep the initial scope bounded.
+- Current presentation is landscape, offline, and realistic automotive 3D; one vehicle and one environment keep the initial scope bounded.
 - The existing README mentions UE5. This plan deliberately selects Godot; update the README when implementation begins so documentation matches the actual project.
 - Exact Android minimum version, device tier, engine export requirements, and final asset sources will be established during the first milestone. No Epic account or Unreal download is required for this approach.
 
 The next implementation task is milestone 1 followed by the driving proof. Build the smallest playable slice first, then use its handling and performance evidence to guide the remaining work.
+
+## Direction update — 2026-10-28
+
+The user requested a realistic art style, reflective cars, a home garage and later garages themed to locations. Version 0.2 implements the first home garage and the automotive rendering foundation. It does not claim completed photorealistic environments, production characters or garage unlock progression. The original stylized prototype remains in the first implementation commit for comparison.

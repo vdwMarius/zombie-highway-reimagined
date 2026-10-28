@@ -1,8 +1,18 @@
 # Dead Mile
 
-An original Android-first survival driving prototype, inspired by the driving rhythm of Zombie Highway and the vehicle progression of Earn to Die. Built with **Godot 4.6.3**, typed GDScript and original procedural 3D art.
+An original Android-first survival driving prototype, inspired by the driving rhythm of Zombie Highway and the vehicle progression of Earn to Die. Built with **Godot 4.6.3**, typed GDScript, detailed licensed car geometry and physically based materials.
 
-The current slice includes one SUV, a recycled desert highway, wreck collisions, light/heavy zombie climbers, shooting/reloading, side scraping, roll pressure, pause/retry, and a persistent garage with seven upgrade categories. This is an early playable prototype; the final art, weapon roster, tutorial and device tuning remain ahead.
+The current slice includes one touring coupe, a recycled desert highway, wreck collisions, light/heavy zombie climbers, shooting/reloading, side scraping, roll pressure, pause/retry, and a persistent garage with seven upgrade categories. Version 0.2 adds a realistic automotive direction: clear-coat metallic paint, local reflections, a furnished home garage, textured surfaces and Vulkan rendering. This is an early playable prototype; production characters, the full weapon roster, tutorial and phone tuning remain ahead.
+
+## Download for Android
+
+[**Download Dead Mile 0.2.0 APK**](https://github.com/vdwMarius/zombie-highway-reimagined/raw/refs/heads/builds/dead-mile-v0.2.0-android-arm64.apk)
+
+[ZIP alternative](https://github.com/vdwMarius/zombie-highway-reimagined/raw/refs/heads/builds/dead-mile-v0.2.0-android-arm64.zip) · [Checksums and install notes](https://github.com/vdwMarius/zombie-highway-reimagined/tree/builds)
+
+These are GitHub-hosted files, not cloud-local workspace links. The build is debug-signed for 64-bit Android phones. The high graphics preset targets recent Vulkan phones, initially the Samsung Galaxy S26 Ultra; physical-device validation is still required. If your browser blocks the APK file type, download the ZIP and extract the APK.
+
+![Home garage](docs/screenshots/garage-v0.2.jpg)
 
 ## Run
 
@@ -37,16 +47,20 @@ bash tools/godot.sh --headless --script tests/smoke.gd -- --test
 bash tools/godot.sh --audio-driver Dummy --script tests/smoke.gd -- --test --capture
 ```
 
-Smoke tests isolate player persistence and exercise actual run state, steering, collisions, climber attachment/combat, rewards, saves and retries. Real Android sensor behavior and performance require a phone.
+Rendered checks require Vulkan; use the commands in development notes on the prepared cloud machine. Smoke tests isolate player persistence and exercise actual run state, steering, collisions, climber attachment/combat, rewards, saves and retries. Real Android sensor behavior and performance require a phone.
 
 ## Android debug build
 
 This cloud instance has verified official Godot 4.6.3 Android export templates and Google's Android SDK installed outside the checkout. See [development notes](docs/DEVELOPMENT.md) for exact locations and setup requirements.
 
 ```sh
-bash tools/godot.sh --headless --export-debug Android builds/dead-mile-debug.apk
+bash tools/godot.sh --headless --export-debug Android builds/dead-mile-v0.2.0-android-arm64.apk
 ```
 
-The preset produces a signed **debug** APK for ARM64 phones, minimum Android 7 / API 24, target API 36. It does not request Internet permission. Install manually on a phone, or use `adb install -r builds/dead-mile-debug.apk` when a device is connected and authorized. Release signing, AAB packaging and Play Store distribution are not configured.
+The preset produces a signed **debug** APK for ARM64 phones, minimum Android 7 / API 24, target API 36, with Vulkan graphics. It does not request Internet permission. Install manually on a phone, or use `adb install -r builds/dead-mile-v0.2.0-android-arm64.apk` when a device is connected and authorized. Release signing, AAB packaging and Play Store distribution are not configured.
 
 Read the [game plan](docs/GAME_PLAN.md) for the intended scope, delivery gates and architecture direction, and [asset provenance](assets/LICENSES.md) for licenses.
+
+## Art credits
+
+Car Concept: Eric Chadwick / Darmstadt Graphics Group GmbH, CC BY 4.0, adapted for Dead Mile. Complete attribution is available in the in-game Credits screen and [asset provenance](assets/LICENSES.md).

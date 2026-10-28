@@ -140,8 +140,20 @@ func run() -> void:
 	quit(1 if failures else 0)
 
 func capture(name: String) -> void:
-	await process_frame
-	await RenderingServer.frame_post_draw
+	# Vulkan shaders compile asynchronously; give the real scene and probe capture
+	# time to settle rather than accepting an initial clear-color frame.
+	for i in range(16):
+		await process_frame
+		await RenderingServer.frame_post_draw
 	DirAccess.make_dir_recursive_absolute("res://test-results")
-	var error := root.get_texture().get_image().save_png("res://test-results/%s.png" % name)
+	var image := root.get_texture().get_image()
+	var distinct := false
+	var first := image.get_pixel(5, 5)
+	for x in range(10, image.get_width(), 40):
+		var pixel := image.get_pixel(x, image.get_height() / 2)
+		if absf(pixel.r - first.r) + absf(pixel.g - first.g) + absf(pixel.b - first.b) > 0.03:
+			distinct = true
+			break
+	check(distinct, "Screenshot contains rendered content: " + name)
+	var error := image.save_png("res://test-results/%s.png" % name)
 	check(error == OK, "Rendered screenshot saved: " + name)

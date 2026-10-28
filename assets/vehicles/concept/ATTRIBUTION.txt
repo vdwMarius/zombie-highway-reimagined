@@ -1,0 +1,3 @@
+Car Concept, model and textures by Eric Chadwick / Darmstadt Graphics Group GmbH (2024), CC BY 4.0.
+Derived from a public-domain concept model by Unity Fan. Source: KhronosGroup/glTF-Sample-Assets, Models/CarConcept.
+Modified for Dead Mile: sample plate imagery removed; materials, paint, wheel animation and modular parts adapted for Godot.
