@@ -1,0 +1,11 @@
+{
+  "version": "0.2.0",
+  "version_code": 2,
+  "source_commit": "ae6c6ac721b6f2af0d495a795af6a3bd0ab18c3b",
+  "architecture": "arm64-v8a",
+  "renderer": "mobile/vulkan",
+  "sha256": {
+    "dead-mile-v0.2.0-android-arm64.apk": "d59d5d2a672bb09f2ac21f4f165a4bc2caf888dda64dea0e0e72ecf52b116a8f",
+    "dead-mile-v0.2.0-android-arm64.zip": "29104b0b4f0065c4f27f41b87f76c13b5bd4ff1bfbb20bd24e74b8705d7796e1"
+  }
+}

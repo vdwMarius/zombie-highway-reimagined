@@ -1,0 +1,2 @@
+d59d5d2a672bb09f2ac21f4f165a4bc2caf888dda64dea0e0e72ecf52b116a8f  dead-mile-v0.2.0-android-arm64.apk
+29104b0b4f0065c4f27f41b87f76c13b5bd4ff1bfbb20bd24e74b8705d7796e1  dead-mile-v0.2.0-android-arm64.zip
