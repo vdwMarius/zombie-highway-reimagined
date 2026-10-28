@@ -1,0 +1,10 @@
+.godot/
+builds/*
+!builds/.gitkeep
+*.apk
+*.aab
+*.keystore
+*.jks
+export_credentials.cfg
+test-results/
+.local-dev/
